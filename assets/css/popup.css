@@ -12,19 +12,19 @@ button:focus {
 }
 
 #snoozeButtons {
-    width: 12em;
-    height: 12em;
+    width: 15em;
+    height: 15em;
     border-collapse: collapse;
 }
 
 #snoozeButtons td {
-    width: 4em;
-    height: 4em;
+    width: 5em;
+    height: 5em;
     border: 1px solid #E2E6E6;
     vertical-align: middle;
 }
 
-#snoozeButtons tr:first-child {
+#snoozeButtons tr:first-child td {
     border-top: 0;
 }
 
@@ -58,6 +58,14 @@ button:focus {
 #snoozeButtons button:active {
     background-color: #FED23B;
     color: white;
+}
+
+#snoozeButtons button img {
+    height: 50%;
+    width: 50%;
+
+    display: block;
+    margin: 10% auto;
 }
 
 #statusBar {
