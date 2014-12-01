@@ -1,0 +1,500 @@
+diff --git a/assets/css/popup.css b/assets/css/popup.css
+deleted file mode 100644
+index d2d40f6..0000000
+--- a/assets/css/popup.css
++++ /dev/null
+@@ -1,97 +0,0 @@
+-body {
+-    font-family: sans-serif;
+-    font-size: 1em;
+-}
+-
+-button:hover {
+-    cursor: pointer;
+-}
+-
+-button:focus {
+-    outline: none;
+-}
+-
+-#snoozeButtons {
+-    width: 15em;
+-    height: 15em;
+-    border-collapse: collapse;
+-}
+-
+-#snoozeButtons td {
+-    width: 5em;
+-    height: 5em;
+-    border: 1px solid #E2E6E6;
+-    vertical-align: middle;
+-}
+-
+-#snoozeButtons tr:first-child td {
+-    border-top: 0;
+-}
+-
+-#snoozeButtons tr:last-child {
+-    border-bottom: 0;
+-}
+-
+-#snoozeButtons tr td:first-child {
+-    border-left: 0;
+-}
+-
+-#snoozeButtons tr td:last-child {
+-    border-right: 0;
+-}
+-
+-#snoozeButtons button {
+-    width: 100%;
+-    height: 100%;
+-
+-    background-color: white;
+-    color: #9FA6A8;
+-
+-    border: none;
+-    padding: 0 0.2em;
+-}
+-
+-#snoozeButtons button:hover {
+-    background-color: #F6F8F8;
+-}
+-
+-#snoozeButtons button:active {
+-    background-color: #FED23B;
+-    color: white;
+-}
+-
+-#snoozeButtons button img {
+-    height: 50%;
+-    width: 50%;
+-
+-    display: block;
+-    margin: 10% auto;
+-}
+-
+-#statusBar {
+-    overflow: auto;
+-    padding: 0.8em 0.6em;
+-
+-    font-size: 0.7em;
+-    line-height: 1.5em;
+-}
+-
+-#defaultStatus {
+-    float: left;
+-}
+-
+-#snoozedStatus {
+-    display: none;
+-}
+-
+-#options {
+-    background: url("../icons/options.svg") no-repeat scroll 0 0 transparent;
+-    background-size: 1.4em 1.4em;
+-
+-    width: 1.5em;
+-    height: 1.5em;
+-    border: none;
+-
+-    float: right;
+-    padding: 0px;
+-}
+\ No newline at end of file
+diff --git a/background.js b/background.js
+index 04428c8..65de60d 100644
+--- a/background.js
++++ b/background.js
+@@ -7,7 +7,6 @@
+  */
+ 
+ console.log("Welcome to background.js");
+-var snoozedTabs = {};
+ init();
+ 
+ /**
+@@ -15,43 +14,31 @@ init();
+  * previously snoozed tabs.
+  */
+ function init() {
+-    getSnoozedTabs();
++    console.log("background.js initializing...");
++    localStorage.setItem("snoozedTabs", JSON.stringify({}));
++    chrome.browserAction.setBadgeBackgroundColor({color: "#FED23B"});
+ }
+ 
+ /**
+  * Snoozes a tab for later.
+  * 
+- * @param  {Tab} tab     A Tab object representing the current tab
+- * @param  {int} seconds Time in seconds for which the tab is snoozed
++ * @param  {Tab} tab        A Tab object representing the current tab
++ * @param  {int} alarmTime  Time object representing when the tab should resurface
+  */
+ function snooze(tab, alarmTime) {
+     console.log("\nsnooze called...");
+-    // Update snoozed tabs
+-    getSnoozedTabs(function() {
+-        console.log("Called back in snooze", snoozedTabs);
+-        // Remove tab
+-        chrome.tabs.remove(tab.id, function() {
+-            console.log("removed tab " + tab.url);
+-        });
+-
+-        snoozedTabs[tab.url] = {
+-            url: tab.url,
+-            title: tab.title,
+-            favicon: tab.favIconUrl,
+-            alarmTime: alarmTime
+-        }
+-
+-        console.log("Added tab", snoozedTabs);
+-
+-        // Set alarm
+-        chrome.alarms.create(tab.url, {when: alarmTime.getTime()});
+-
+-        // Set badge text
+-        updateBadgeText();
+-
+-        // Update snoozedTabs
+-        setSnoozedTabs();
++    // Get snoozed tabs
++    
++    var snoozedTabs = getSnoozedTabs();
++    console.log("Loaded from localStorage", snoozedTabs);
++
++    // Remove tab
++    chrome.tabs.remove(tab.id, function() {
++        console.log("Removed tab " + tab.url);
+     });
++
++    // Add tab to snoozedTabs
++    addSnoozedTab(tab, alarmTime, snoozedTabs);
+ }
+ 
+ /**
+@@ -61,60 +48,133 @@ function snooze(tab, alarmTime) {
+ chrome.alarms.onAlarm.addListener(function(alarm) {
+     console.log("\nAlarm went off!", alarm);
+     alert("Alarm went off!" + alarm.name);
+-    // Update snoozed tabs
+-    getSnoozedTabs(function() {
+-        console.log("Called back in popper", snoozedTabs);
+-        // Get tab to be resurfaced
+-        var tab = snoozedTabs[alarm.name];
+ 
+-        // Create window and open tab
++    var snoozedTabs = getSnoozedTabs();
++    console.log("Loaded from localStorage", snoozedTabs);
++
++    // Get tabs to be resurfaced
++    var tabs = snoozedTabs[alarm.scheduledTime];
++
++    // Save current window so we can keep focus
++    var currentWindow;
++    chrome.windows.getCurrent(function(w) {
++        console.log("Got current window", w);
++        currentWindow = w;
++
++        // Create window for resurfaced tabs
++        var newWindow;
+         chrome.windows.create({
+             focused: false
+-        }, function(window) {
+-            createTab(tab, window);
++        }, function(w) {
++            newWindow = w;
++
++            // Create tabs in newWindow
++            for(var i = 0; i < tabs.length; i++) {
++                createTab(tabs[i], newWindow);
++            }
++
++            // Refocus old window
++            chrome.windows.update(currentWindow.id, {focused: true}, function() {
++                console.log("Refocused old window!");
++
++                /* NOTE: Creating tabs is asynchronous; It's possible for them
++                to fail and for us to delete the whole set from storage; FIX THIS. */
++                
++                // Delete key
++                delete snoozedTabs[alarm.scheduledTime];
++
++                // Set badge text
++                updateBadgeText(snoozedTabs);
++
++                // Update snoozed tabs
++                setSnoozedTabs(snoozedTabs);
++            });
+         });
+-        
+-        // Delete key
+-        delete snoozedTabs[tab.url];
+-
+-        // Update snoozed tabs and badge text
+-        setSnoozedTabs();
+-        updateBadgeText();
+     });
+ });
+ 
+-function createTab(tab, window) {
+-    chrome.tabs.create({
+-        windowId: window.id,
++function changeSnoozeTime(tab, newTime) {
++    if(newTime == tab.alarmTime) {
++        console.log("newTime same as oldTime, returning");
++        return;
++    }
++
++    var snoozedTabs = getSnoozedTabs();
++
++    // Remove tab from old alarm set
++    removeSnoozedTab(tab, snoozedTabs);
++
++    // Add tab to new alarm set
++    addTab(tab, newTime, snoozedTabs);
++}
++
++function getSnoozedTabs() {
++    return JSON.parse(localStorage.getItem("snoozedTabs"));
++}
++
++function setSnoozedTabs(newSnoozedTabs) {
++    localStorage.setItem("snoozedTabs", JSON.stringify(newSnoozedTabs));
++}
++
++function addSnoozedTab(tab, alarmTime, snoozedTabs) {
++    var fullTime = alarmTime.getTime();
++    if(!snoozedTabs[fullTime]) {
++        snoozedTabs[fullTime] = [];
++    }
++
++    snoozedTabs[fullTime].push({
++        type: "tab",
+         url: tab.url,
+-        active: false
++        title: tab.title,
++        favicon: tab.favIconUrl,
++        creationTime: (new Date()),
++        alarmTime: alarmTime
+     });
++
++    console.log("Added tab", snoozedTabs);
++
++    // Set alarm
++    chrome.alarms.create({when: fullTime});
++
++    // Set badge text
++    updateBadgeText(snoozedTabs);
++
++    // Update snoozedTabs
++    setSnoozedTabs(snoozedTabs);
+ }
+ 
+-function getSnoozedTabs(callback) {
+-    chrome.storage.sync.get(snoozedTabs, function(storedSnoozedTabs) {
+-        console.log("Got snoozedTabs from ", storedSnoozedTabs);
+-        snoozedTabs = storedSnoozedTabs;
+-        if(callback) {
+-            callback();
+-        }
+-    });
++function removeSnoozedTab(tab, snoozedTabs) {
++    var alarmTime = tab.alarmTime;
++    var alarmSet = snoozedTabs[alarmTime];
++
++    // Search for tab
++    var tabIndex = alarmSet.indexOf(tab);
++    if(tabIndex < 0) {
++        console.log("Tab not found, returning");
++        return;
++    }
++    
++    // Update old alarm set
++    alarmSet.splice(tabIndex, 1);
++    if(alarmSet.length == 0) {
++        delete snoozedTabs[alarmTime];
++    }
++
++    snoozedTabs[alarmTime] = alarmSet;
+ }
+ 
+-function setSnoozedTabs(callback) {
+-    chrome.storage.sync.set(snoozedTabs, function() {
+-        console.log("Set snoozedTabs to", snoozedTabs);
+-        if(callback) {
+-            callback();
+-        }
++function createTab(tab, w) {
++    chrome.tabs.create({
++        windowId: w.id,
++        url: tab.url,
++        active: false
+     });
+ }
+ 
+-function updateBadgeText() {
++function updateBadgeText(snoozedTabs) {
+     console.log("Updating badge text...");
+     var snoozedCount = Object.keys(snoozedTabs).length;
+     var countString = (snoozedCount > 0) ? snoozedCount.toString() : "";
+ 
+     chrome.browserAction.setBadgeText({text: countString});
+-    chrome.browserAction.setBadgeBackgroundColor({color: "#FED23B"});
+ }
+\ No newline at end of file
+diff --git a/manifest.json b/manifest.json
+index 0c84a9e..0cf4460 100644
+--- a/manifest.json
++++ b/manifest.json
+@@ -17,7 +17,7 @@
+   // Popup on clicking extension icon
+   "browser_action": {
+     "default_icon": "assets/icons/browserAction.png",
+-    "default_popup": "popup.html"
++    "default_popup": "popup/popup.html"
+   },
+ 
+   // Core functionality
+@@ -27,7 +27,7 @@
+   },
+ 
+   // Extension options
+-  "options_page": "options.html",
++  "options_page": "options/index.html",
+ 
+   // User permissions
+   "permissions": [
+diff --git a/options.html b/options.html
+deleted file mode 100644
+index 0263913..0000000
+--- a/options.html
++++ /dev/null
+@@ -1,9 +0,0 @@
+-<!doctype html>
+-<html>
+-<head>
+-    <title>Options</title>
+-</head>
+-<body>
+-    <h1>Tab Snooze's Options</h1>
+-</body>
+-</html>
+\ No newline at end of file
+diff --git a/popup.html b/popup.html
+deleted file mode 100644
+index 4a830b1..0000000
+--- a/popup.html
++++ /dev/null
+@@ -1,39 +0,0 @@
+-<!doctype html>
+-<html>
+-<head>
+-    <title>Tab Snooze's Popup</title>
+-    <link rel="stylesheet" type="text/css" href="assets/css/reset.css">
+-    <link rel="stylesheet" type="text/css" href="assets/css/popup.css">
+-</head>
+-<body>
+-    <table id="snoozeButtons">
+-        <tr>
+-            <td><button type="button" id="tenSeconds">10 Seconds</button></td>
+-            <td><button type="button" id="laterToday">Later Today</button></td>
+-            <td><button type="button" id="thisEvening"><img src="assets/icons/evening.svg">This Evening</button></td>
+-        </tr>
+-
+-        <tr>
+-            <td><button type="button" id="tomorrow">Tomorrow</button></td>
+-            <td><button type="button" id="thisWeekend">This Weekend</button></td>
+-            <td><button type="button" id="nextWeek">Next Week</button></td>
+-        </tr>
+-        
+-        <tr>
+-            <td><button type="button" id="inAMonth">In a Month</button></td>
+-            <td><button type="button" id="someday">Someday</button></td>
+-            <td><button type="button" id="pickDate">Pick Date</button></td>
+-        </tr>
+-    </table>
+-
+-    <div id="statusBar">
+-        <div id="defaultStatus">18 Snoozed Tabs</div>
+-        <div id="snoozedStatus">Snoozed! <button type="button" id="undo">Undo</button></div>
+-        <button type="button" id="options" name="options"></button>
+-    </div>
+-
+-    <!-- Javascript -->
+-    <script src="assets/js/jquery-2.1.1.min.js"></script>
+-    <script src="popup.js"></script>
+-</body>
+-</html>
+\ No newline at end of file
+diff --git a/popup.js b/popup.js
+deleted file mode 100644
+index 1a9ea9b..0000000
+--- a/popup.js
++++ /dev/null
+@@ -1,64 +0,0 @@
+-$(document).ready(function() {
+-    console.log("Welcome to popup.js\nAll log messages (not errors!) will be printed to the background page's console.\nGoodbye!");
+-    var bg = chrome.extension.getBackgroundPage();
+-    window.console = bg.console;
+-    init();
+-
+-    function init() {
+-        console.log("init called");
+-        $("#snoozeButtons button").click(function() {
+-            var time = getTime($(this).attr("id"));
+-            snoozeCurrentTab(time);
+-        });
+-    }
+-
+-    function snoozeCurrentTab(time) {
+-        chrome.tabs.query({
+-            currentWindow: true,
+-            active: true
+-        }, function(tabs) {
+-            console.log("tabs: ", tabs);
+-            bg.snooze(tabs[0], time);
+-        });
+-    }
+-
+-    function getTime(timeName) {
+-        console.log("timeName", timeName);
+-        console.log("now", new Date());
+-
+-        var roundedNow = new Date();
+-        roundedNow.setSeconds(0, 0); // Round date to minutes
+-        console.log("roundedNow", roundedNow);
+-
+-        var second = 1000;
+-        var minute = second * 60;
+-        var hour = minute * 60;
+-        var day = hour * 24;      
+-
+-        var result; 
+-
+-        switch(timeName) {
+-            case "tenSeconds":
+-                result = new Date(Date.now() + 10 * second);
+-                break;
+-            case "laterToday":
+-                result = new Date(roundedNow.getTime() + 3 * hour);
+-                break;
+-            case "thisEvening":
+-                result = new Date();
+-                result.setHours(18, 0, 0, 0); // 6:00:00:00 PM
+-                break;
+-            case "tomorrow":
+-                result = new Date();
+-                result.setDate(result.getDate() + 1); // Automatically updates months
+-                result.setHours(9, 0, 0, 0); // 9:00:00:00 AM
+-                break;
+-            default:
+-                result = new Date();
+-        }
+-
+-        console.log("result", result);
+-        return result;
+-    }
+-});
+-

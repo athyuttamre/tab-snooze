@@ -1,0 +1,129 @@
+body {
+    font-family: sans-serif;
+}
+
+button:focus {
+    outline: none;
+}
+
+/**
+ * Page Layout
+ * Source: chrome://extensions + custom code
+ */
+#navigation {
+    height: 100%;
+
+    position: absolute;
+    left: 0;
+    width: 180px;
+}
+
+#options-container {
+    min-width: 540px;
+    max-width: 720px;
+
+    position: absolute;
+    left: 180px;
+    right: 20px;
+    top: 0;
+    bottom: 0;
+}
+
+/**
+ * Navigation
+ * Source: chrome://uber-frame + custom code
+ */
+#navigation h1 {
+  -webkit-margin-after: 1em;
+  /* This value must match the top padding of the uber page header. */
+  -webkit-margin-before: 21px;
+  -webkit-margin-start: 23px;
+  color: rgb(92, 97, 102);
+}
+
+#navigation ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+#navigation li {
+  -webkit-border-start: 6px solid transparent;
+  -webkit-padding-start: 18px;
+  -webkit-user-select: none;
+  cursor: pointer;
+}
+
+#navigation li:hover {
+  color: #777;
+}
+
+#navigation li.selected {
+  -webkit-border-start-color: rgb(78, 87, 100);
+  cursor: default;
+  pointer-events: none;
+}
+
+#navigation #about-li {
+    margin-top: 27px;
+}
+
+#navigation button {
+  background-color: white;
+  border: 0;
+  color: #999;
+  cursor: pointer;
+  font: inherit;
+  line-height: 1.417em;  /* 17px based on default 12px font size. */
+  margin: 6px 0;
+  padding: 0;
+}
+
+#navigation .selected > button {
+  color: rgb(70, 78, 90);
+}
+
+
+/**
+ * Options Sections
+ * Source: chrome://extensions-frame + custom code
+ */
+
+.options-section {
+    /* Animation */
+    opacity: 0;
+    -webkit-margin-start: -20px;
+
+    -webkit-transition: margin 100ms, opacity 100ms;
+}
+
+.options-section.selected {
+    opacity: 1;
+    -webkit-margin-start: 0;
+
+    -webkit-transition: margin 200ms, opacity 200ms;
+    -webkit-transition-delay: 100ms;
+}
+
+.options-section header {
+    min-width: 540px;
+    max-width: 720px;
+
+    position: fixed;
+    top: 0;
+    right: 20px;
+    left: 180px;
+
+    background-image: -webkit-linear-gradient(white, white 40%, rgba(255, 255, 255, 0.92));
+    border-bottom: 1px solid #eee;
+}
+
+.options-section header h2 {
+    margin: 0;
+    padding: 21px 0px 13px;
+}
+
+.options-section header button {
+    position: absolute;
+    top: 21px;
+    right: 0px;
+}

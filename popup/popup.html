@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+    <title>Tab Snooze's Popup</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/reset.css">
+    <link rel="stylesheet" type="text/css" href="popup.css">
+</head>
+<body>
+    <table id="snooze-buttons">
+        <tr>
+            <td><button type="button" id="ten-seconds">10 Seconds</button></td>
+            <td><button type="button" id="later-today">Later Today</button></td>
+            <td><button type="button" id="this-evening"><img src="/assets/icons/evening.svg">This Evening</button></td>
+        </tr>
+
+        <tr>
+            <td><button type="button" id="tomorrow">Tomorrow</button></td>
+            <td><button type="button" id="this-weekend">This Weekend</button></td>
+            <td><button type="button" id="next-week">Next Week</button></td>
+        </tr>
+        
+        <tr>
+            <td><button type="button" id="in-a-month">In a Month</button></td>
+            <td><button type="button" id="someday">Someday</button></td>
+            <td><button type="button" id="pick-date">Pick Date</button></td>
+        </tr>
+    </table>
+
+    <div id="status-bar">
+        <div id="default-status">18 Snoozed Tabs</div>
+        <div id="snoozed-status">Snoozed! <button type="button" id="undo">Undo</button></div>
+        <button type="button" id="options" name="options"></button>
+    </div>
+
+    <!-- Javascript -->
+    <script src="/assets/js/jquery-2.1.1.min.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html>

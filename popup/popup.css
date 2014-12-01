@@ -11,36 +11,36 @@ button:focus {
     outline: none;
 }
 
-#snoozeButtons {
-    width: 15em;
-    height: 15em;
+#snooze-buttons {
+    width: 16.5em;
+    height: 16.5em;
     border-collapse: collapse;
 }
 
-#snoozeButtons td {
-    width: 5em;
-    height: 5em;
+#snooze-buttons td {
+    width: 5.5em;
+    height: 5.5em;
     border: 1px solid #E2E6E6;
     vertical-align: middle;
 }
 
-#snoozeButtons tr:first-child td {
+#snooze-buttons tr:first-child td {
     border-top: 0;
 }
 
-#snoozeButtons tr:last-child {
+#snooze-buttons tr:last-child {
     border-bottom: 0;
 }
 
-#snoozeButtons tr td:first-child {
+#snooze-buttons tr td:first-child {
     border-left: 0;
 }
 
-#snoozeButtons tr td:last-child {
+#snooze-buttons tr td:last-child {
     border-right: 0;
 }
 
-#snoozeButtons button {
+#snooze-buttons button {
     width: 100%;
     height: 100%;
 
@@ -51,24 +51,24 @@ button:focus {
     padding: 0 0.2em;
 }
 
-#snoozeButtons button:hover {
+#snooze-buttons button:hover {
     background-color: #F6F8F8;
 }
 
-#snoozeButtons button:active {
+#snooze-buttons button:active {
     background-color: #FED23B;
     color: white;
 }
 
-#snoozeButtons button img {
-    height: 50%;
-    width: 50%;
+#snooze-buttons button img {
+    height: 40%;
+    width: 40%;
 
     display: block;
-    margin: 10% auto;
+    margin: 12% auto;
 }
 
-#statusBar {
+#status-bar {
     overflow: auto;
     padding: 0.8em 0.6em;
 
@@ -76,16 +76,16 @@ button:focus {
     line-height: 1.5em;
 }
 
-#defaultStatus {
+#default-status {
     float: left;
 }
 
-#snoozedStatus {
+#snoozed-status {
     display: none;
 }
 
 #options {
-    background: url("../icons/options.svg") no-repeat scroll 0 0 transparent;
+    background: url("/assets/icons/options.svg") no-repeat scroll 0 0 transparent;
     background-size: 1.4em 1.4em;
 
     width: 1.5em;

@@ -17,7 +17,7 @@
   // Popup on clicking extension icon
   "browser_action": {
     "default_icon": "assets/icons/browserAction.png",
-    "default_popup": "popup.html"
+    "default_popup": "popup/popup.html"
   },
 
   // Core functionality
@@ -27,7 +27,7 @@
   },
 
   // Extension options
-  "options_page": "options.html",
+  "options_page": "options/index.html",
 
   // User permissions
   "permissions": [

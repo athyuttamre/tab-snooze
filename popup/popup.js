@@ -5,8 +5,10 @@ $(document).ready(function() {
     init();
 
     function init() {
-        console.log("init called");
-        $("#snoozeButtons button").click(function() {
+        console.log("\npopup.js initializing...");
+
+        // Set up button click-handlers
+        $("#snooze-buttons button").click(function() {
             var time = getTime($(this).attr("id"));
             snoozeCurrentTab(time);
         });
@@ -26,6 +28,7 @@ $(document).ready(function() {
         console.log("timeName", timeName);
         console.log("now", new Date());
 
+        // Get rounded time
         var roundedNow = new Date();
         roundedNow.setSeconds(0, 0); // Round date to minutes
         console.log("roundedNow", roundedNow);
@@ -37,14 +40,15 @@ $(document).ready(function() {
 
         var result; 
 
+        // Calculate wake-up time
         switch(timeName) {
-            case "tenSeconds":
+            case "ten-seconds":
                 result = new Date(Date.now() + 10 * second);
                 break;
-            case "laterToday":
+            case "later-today":
                 result = new Date(roundedNow.getTime() + 3 * hour);
                 break;
-            case "thisEvening":
+            case "this-evening":
                 result = new Date();
                 result.setHours(18, 0, 0, 0); // 6:00:00:00 PM
                 break;
@@ -54,6 +58,7 @@ $(document).ready(function() {
                 result.setHours(9, 0, 0, 0); // 9:00:00:00 AM
                 break;
             default:
+                // TO-DO: Fill out rest here
                 result = new Date();
         }
 
