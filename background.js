@@ -56,7 +56,6 @@ function snooze(tab, alarmTime) {
 
 function popCheck() {
     console.log("popChecking...");
-    var now = Date.now();
 
     var snoozedTabs = getSnoozedTabs();
     console.log("Loaded from localStorage", snoozedTabs);
@@ -64,7 +63,9 @@ function popCheck() {
     var timestamps = Object.keys(snoozedTabs).sort();
     console.log("timestamps", timestamps);
 
-    for(var i = 0; i < timestamps; i++) {
+    for(var i = 0; i < timestamps.length - 1; i++) {
+        console.log("checking", timestamps[i]);
+        var now = Date.now();
         if(timestamps[i] < now) {
             popTabs(timestamps[i], snoozedTabs);
         } else {
