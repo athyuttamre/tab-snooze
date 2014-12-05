@@ -11,6 +11,10 @@ button:focus {
     outline: none;
 }
 
+/**
+ * Snooze Buttons Layout
+ */
+
 #snooze-buttons {
     width: 16.5em;
     height: 16.5em;
@@ -60,13 +64,99 @@ button:focus {
     color: white;
 }
 
-#snooze-buttons button img {
-    height: 40%;
-    width: 40%;
+#snooze-buttons button .button-image {
+    height: 40px;
+    width: 40px;
 
     display: block;
-    margin: 12% auto;
+    margin: 6px auto;
+
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 100%;
 }
+
+/**
+ * Snooze Buttons Custom
+ */
+
+#ten-seconds .button-image {
+    background-image: url("/assets/icons/grey/ten-seconds.png");
+}
+
+#ten-seconds:active .button-image {
+    background-image: url("/assets/icons/white/ten-seconds.png");
+}
+
+#later-today .button-image {
+    background-image: url("/assets/icons/grey/later-today.png");
+    background-size: 75% !important;
+}
+
+#later-today:active .button-image {
+    background-image: url("/assets/icons/white/later-today.png");
+}
+
+#this-evening .button-image {
+    background-image: url("/assets/icons/grey/this-evening.png");
+}
+
+#this-evening:active .button-image {
+    background-image: url("/assets/icons/white/this-evening.png");
+}
+
+#tomorrow .button-image {
+    background-image: url("/assets/icons/grey/tomorrow.png");
+}
+
+#tomorrow:active .button-image {
+    background-image: url("/assets/icons/white/tomorrow.png");
+}
+
+#this-weekend .button-image {
+    background-image: url("/assets/icons/grey/this-weekend.png");
+}
+
+#this-weekend:active .button-image {
+    background-image: url("/assets/icons/white/this-weekend.png");
+}
+
+#next-week .button-image {
+    background-image: url("/assets/icons/grey/next-week.png");
+}
+
+#next-week:active .button-image {
+    background-image: url("/assets/icons/white/next-week.png");
+}
+
+#in-a-month .button-image {
+    background-image: url("/assets/icons/grey/in-a-month.png");
+    background-size: 80% !important;
+}
+
+#in-a-month:active .button-image {
+    background-image: url("/assets/icons/white/in-a-month.png");
+}
+
+#someday .button-image {
+    background-image: url("/assets/icons/grey/someday.png");
+}
+
+#someday:active .button-image {
+    background-image: url("/assets/icons/white/someday.png");
+}
+
+#pick-date .button-image {
+    background-image: url("/assets/icons/grey/pick-date.png");
+}
+
+#pick-date:active .button-image {
+    background-image: url("/assets/icons/white/pick-date.png");
+}
+
+/**
+ * Status Bar
+ */
 
 #status-bar {
     overflow: auto;

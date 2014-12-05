@@ -160,6 +160,8 @@ function clearAll() {
                 $(this).remove();
             });
         });
+
+        $("#clear-all").prop('disabled', true);
     }
 }
 
@@ -175,4 +177,8 @@ function clearEntry(tab, entry) {
             $(this).remove();
         });
     });
+
+    if(snoozedTabs["tabCount"] == 0) {
+        $("#clear-all").prop('disabled', true);
+    }
 }
