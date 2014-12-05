@@ -33,7 +33,14 @@
   "permissions": [
     "tabs",
     "alarms",
-    "storage"
+    "storage",
+    "notifications"
+  ],
+
+  "web_accessible_resources": [
+    "options/index.html",
+    "manifest.json",
+    "assets/*"
   ],
 
   // Keyboard shortcuts

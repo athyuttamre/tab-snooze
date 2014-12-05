@@ -84,7 +84,7 @@ button:focus {
     display: none;
 }
 
-#options {
+#settings {
     background: url("/assets/icons/options.svg") no-repeat scroll 0 0 transparent;
     background-size: 1.4em 1.4em;
 

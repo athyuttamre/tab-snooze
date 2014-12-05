@@ -10,13 +10,26 @@ console.log("Welcome to background.js");
 init();
 
 /**
- * Initializes the extension by loading
- * previously snoozed tabs.
+ * Initializes the extension by getting already snoozed
+ * tabs or starting a new list.
  */
 function init() {
     console.log("background.js initializing...");
-    localStorage.setItem("snoozedTabs", JSON.stringify({}));
+
+    // Load or set snoozedTabs
+    var currentTabs = JSON.parse(localStorage.getItem("snoozedTabs"));
+    if(!currentTabs) {
+            currentTabs = {};
+            currentTabs["tabCount"] = 0;
+            localStorage.setItem("snoozedTabs", JSON.stringify(currentTabs));
+    }
+
+    // Set browserAction badge color
     chrome.browserAction.setBadgeBackgroundColor({color: "#FED23B"});
+    updateBadgeText(currentTabs);
+
+    // Set popper loop
+    window.setInterval(popCheck, 10000);
 }
 
 /**
@@ -41,57 +54,65 @@ function snooze(tab, alarmTime) {
     addSnoozedTab(tab, alarmTime, snoozedTabs);
 }
 
-/**
- * Resurfaces the tab when its alarm goes off.
- * @param  {Alarm} alarm    Alarm object continaing the name and time
- */
-chrome.alarms.onAlarm.addListener(function(alarm) {
-    console.log("\nAlarm went off!", alarm);
-    alert("Alarm went off!" + alarm.name);
+function popCheck() {
+    console.log("popChecking...");
+    var now = Date.now();
 
     var snoozedTabs = getSnoozedTabs();
     console.log("Loaded from localStorage", snoozedTabs);
 
+    var timestamps = Object.keys(snoozedTabs).sort();
+    console.log("timestamps", timestamps);
+
+    for(var i = 0; i < timestamps; i++) {
+        if(timestamps[i] < now) {
+            popTabs(timestamps[i], snoozedTabs);
+        } else {
+            break;
+        }
+    }
+}
+
+/**
+ * Pops tabs that were supposed to resurface at given time
+ * @param  {String} timestamp   Timestamp of the tabs set
+ */
+function popTabs(timestamp, snoozedTabs) {
+    console.log("\npopTabs went off!", timestamp);
+    alert("Popping tabs!");
+
+    /* NOTE: Use notifications instead of alerts */
+
     // Get tabs to be resurfaced
-    var tabs = snoozedTabs[alarm.scheduledTime];
+    var tabs = snoozedTabs[timestamp];
 
-    // Save current window so we can keep focus
-    var currentWindow;
-    chrome.windows.getCurrent(function(w) {
-        console.log("Got current window", w);
-        currentWindow = w;
+    // Create window for resurfaced tabs
+    var newWindow;
 
-        // Create window for resurfaced tabs
-        var newWindow;
-        chrome.windows.create({
-            focused: false
-        }, function(w) {
-            newWindow = w;
+    chrome.windows.create({
+        focused: false
+    }, function(w) {
+        newWindow = w;
 
-            // Create tabs in newWindow
-            for(var i = 0; i < tabs.length; i++) {
-                createTab(tabs[i], newWindow);
-            }
+        // Create tabs in newWindow
+        for(var i = 0; i < tabs.length; i++) {
+            createTab(tabs[i], newWindow);
+        }
 
-            // Refocus old window
-            chrome.windows.update(currentWindow.id, {focused: true}, function() {
-                console.log("Refocused old window!");
+        /* NOTE: Creating tabs is asynchronous; It's possible for them
+        to fail and for us to delete the whole set from storage; FIX THIS. */
+        
+        // Delete key and update tabCount
+        delete snoozedTabs[timestamp];
+        snoozedTabs["tabCount"] -= tabs.length;
 
-                /* NOTE: Creating tabs is asynchronous; It's possible for them
-                to fail and for us to delete the whole set from storage; FIX THIS. */
-                
-                // Delete key
-                delete snoozedTabs[alarm.scheduledTime];
+        // Set badge text
+        updateBadgeText(snoozedTabs);
 
-                // Set badge text
-                updateBadgeText(snoozedTabs);
-
-                // Update snoozed tabs
-                setSnoozedTabs(snoozedTabs);
-            });
-        });
+        // Update snoozed tabs
+        setSnoozedTabs(snoozedTabs);
     });
-});
+}
 
 function changeSnoozeTime(tab, newTime) {
     if(newTime == tab.alarmTime) {
@@ -132,9 +153,7 @@ function addSnoozedTab(tab, alarmTime, snoozedTabs) {
     });
 
     console.log("Added tab", snoozedTabs);
-
-    // Set alarm
-    chrome.alarms.create({when: fullTime});
+    snoozedTabs["tabCount"] += 1;
 
     // Set badge text
     updateBadgeText(snoozedTabs);
@@ -144,8 +163,12 @@ function addSnoozedTab(tab, alarmTime, snoozedTabs) {
 }
 
 function removeSnoozedTab(tab, snoozedTabs) {
-    var alarmTime = tab.alarmTime;
+    console.log("removeSnoozedTab called");
+    console.log(tab);
+    console.log(snoozedTabs);
+    var alarmTime = (new Date(tab.alarmTime)).getTime();
     var alarmSet = snoozedTabs[alarmTime];
+    console.log("alarmSet", alarmSet);
 
     // Search for tab
     var tabIndex = alarmSet.indexOf(tab);
@@ -160,7 +183,13 @@ function removeSnoozedTab(tab, snoozedTabs) {
         delete snoozedTabs[alarmTime];
     }
 
-    snoozedTabs[alarmTime] = alarmSet;
+    if(alarmSet.length == 0) {
+        delete snoozedTabs[alarmTime];
+    } else {
+        snoozedTabs[alarmTime] = alarmSet;
+    }
+
+    snoozedTabs["tabCount"] -= 1;
 }
 
 function createTab(tab, w) {
@@ -173,7 +202,9 @@ function createTab(tab, w) {
 
 function updateBadgeText(snoozedTabs) {
     console.log("Updating badge text...");
-    var snoozedCount = Object.keys(snoozedTabs).length;
+    console.log(snoozedTabs);
+    var snoozedCount = snoozedTabs["tabCount"];
+    console.log("snoozedCount", snoozedCount);
     var countString = (snoozedCount > 0) ? snoozedCount.toString() : "";
 
     chrome.browserAction.setBadgeText({text: countString});
