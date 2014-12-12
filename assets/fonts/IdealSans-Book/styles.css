@@ -1,0 +1,8 @@
+
+@font-face {
+  font-family: 'IdealSans-Book';
+  src: url('IdealSans-Book.eot?#iefix') format('embedded-opentype'),  url('IdealSans-Book.otf')  format('opentype'),
+	     url('IdealSans-Book.woff') format('woff'), url('IdealSans-Book.ttf')  format('truetype'), url('IdealSans-Book.svg#IdealSans-Book') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}

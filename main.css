@@ -1,0 +1,177 @@
+/* Meyer's Reset */
+
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+    display: block;
+}
+body {
+    line-height: 1;
+}
+ol, ul {
+    list-style: none;
+}
+blockquote, q {
+    quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+    content: '';
+    content: none;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+/* Styles */
+
+body {
+    font-family: 'WhitneyHTF-Light';
+}
+
+.container {
+    width: 80%;
+    max-width: 800px;
+    margin: auto;
+}
+
+.splash {
+    margin-top: 10%;
+    margin-bottom: 10%;
+    overflow: auto;
+}
+
+.title-desc {
+    float: left;
+    margin-top: 200px;
+}
+
+.title {
+    font-family: 'IdealSans-Book';
+    font-size: 4em;
+    color: #ffd321;
+}
+
+.desc {
+    color: #9fa6a8;
+    font-size: 1.5em;
+    margin-top: 5px;
+
+    text-indent: 0.2em;
+}
+
+.download {
+    text-align: left;
+    padding: 10px 20px;
+
+    margin-left: 0.2em;
+
+    font-family: inherit;
+    font-size: 1em;
+
+    outline: 0;
+    border: 2px solid #666;
+    border-radius: 3px;
+    
+    color: white;
+    background-color: #666;
+
+    margin-top: 30px;
+}
+
+.download:hover {
+    cursor: pointer;
+    background-color: #4e4e4e;
+    border: 2px solid #4e4e4e;
+
+    transition: 0.1s ease-out;
+}
+
+.leading-image {
+    width: 100%;
+    max-width: 400px;
+    margin: auto;
+
+    margin-top: 100px;
+
+    float: right;
+}
+
+footer {
+    margin-top: 50px;
+    margin-bottom: 30px;
+    line-height: 1.5em;
+}
+
+footer span {
+    display: inline-block;
+}
+
+footer a {
+    text-decoration: none;
+    padding-bottom: 3px;
+}
+
+footer a:hover {
+    border-bottom: 1px solid 
+}
+
+@media (max-width: 900px) {
+    .leading-image {
+        display: block;
+        float: none;
+        margin-top: 0px;
+    }
+
+    .title-desc {
+        display: block;
+        float: none;
+        margin-top: 20px;
+
+        text-align: center;
+    }
+
+    footer {
+        text-align: center;
+    }
+}
+
+@media (max-width: 450px) {
+    footer {
+        margin-top: 80px;
+    }
+    
+    footer span {
+        display: block;
+    }
+
+    .bullet {
+        display: none;
+    }
+}
