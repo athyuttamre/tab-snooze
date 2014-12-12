@@ -17,16 +17,33 @@ function init() {
     console.log("background.js initializing...");
 
     // Load or set snoozedTabs
-    var currentTabs = JSON.parse(localStorage.getItem("snoozedTabs"));
+    var currentTabs = getSnoozedTabs();
     if(!currentTabs) {
             currentTabs = {};
             currentTabs["tabCount"] = 0;
             localStorage.setItem("snoozedTabs", JSON.stringify(currentTabs));
     }
 
+    // Load or set settings
+    var settings = getSettings();
+    if(!settings) {
+        settings = {
+            "start-day": "9:00 AM",
+            "end-day": "6:00 PM",
+            "start-weekend": "10:00 AM",
+            "week-begin": 1,
+            "weekend-begin": 6,
+            "later-today": 3,
+            "someday": 3,
+            "badge": true
+        };
+        setSettings(settings);
+        localStorage.setItem("defaultSettings", JSON.stringify(settings));
+    }
+
     // Set browserAction badge color
     chrome.browserAction.setBadgeBackgroundColor({color: "#FED23B"});
-    updateBadgeText(currentTabs);
+    updateBadgeText();
 
     // Set popper loop
     window.setInterval(popCheck, 10000);
@@ -108,7 +125,7 @@ function popTabs(timestamp, snoozedTabs) {
         snoozedTabs["tabCount"] -= tabs.length;
 
         // Set badge text
-        updateBadgeText(snoozedTabs);
+        updateBadgeText();
 
         // Update snoozed tabs
         setSnoozedTabs(snoozedTabs);
@@ -138,6 +155,14 @@ function setSnoozedTabs(newSnoozedTabs) {
     localStorage.setItem("snoozedTabs", JSON.stringify(newSnoozedTabs));
 }
 
+function getSettings() {
+    return JSON.parse(localStorage.getItem("settings"));
+}
+
+function setSettings(newSettings) {
+    localStorage.setItem("settings", JSON.stringify(newSettings));
+}
+
 function addSnoozedTab(tab, alarmTime, snoozedTabs) {
     var fullTime = alarmTime.getTime();
     if(!snoozedTabs[fullTime]) {
@@ -157,7 +182,7 @@ function addSnoozedTab(tab, alarmTime, snoozedTabs) {
     snoozedTabs["tabCount"] += 1;
 
     // Set badge text
-    updateBadgeText(snoozedTabs);
+    updateBadgeText();
 
     // Update snoozedTabs
     setSnoozedTabs(snoozedTabs);
@@ -201,9 +226,24 @@ function createTab(tab, w) {
     });
 }
 
-function updateBadgeText(snoozedTabs) {
+function updateBadgeText() {
+    var snoozedTabs = getSnoozedTabs();
     console.log("Updating badge text...");
     console.log(snoozedTabs);
+
+    var settings = getSettings();
+    var badgeSetting = settings["badge"];
+    console.log("badgeSetting", badgeSetting);
+    if(badgeSetting === "false") {
+        console.log("badge set to false");
+        chrome.browserAction.setBadgeText({text: ""});
+        return;
+    }
+
+    if(!snoozedTabs) {
+        return;
+    }
+
     var snoozedCount = snoozedTabs["tabCount"];
     console.log("snoozedCount", snoozedCount);
     var countString = (snoozedCount > 0) ? snoozedCount.toString() : "";

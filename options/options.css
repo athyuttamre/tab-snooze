@@ -14,7 +14,7 @@ button:focus {
 #navigation {
     height: 100%;
 
-    position: absolute;
+    position: fixed;
     left: 0;
     width: 180px;
 }
@@ -28,6 +28,10 @@ button:focus {
     right: 20px;
     top: 50px;
     bottom: 0;
+}
+
+#days-list > li, #settings-list > li {
+    margin-bottom: 30px;
 }
 
 /**
@@ -64,10 +68,6 @@ button:focus {
     pointer-events: none;
 }
 
-#navigation #about-li {
-    margin-top: 27px;
-}
-
 #navigation button {
     background-color: white;
     border: 0;
@@ -92,19 +92,7 @@ button:focus {
  */
 
 .options-section {
-    /* Animation */
-    opacity: 0;
-    -webkit-margin-start: -20px;
-
-    -webkit-transition: margin 100ms, opacity 100ms;
-}
-
-.options-section.selected {
-    opacity: 1;
-    -webkit-margin-start: 0;
-
-    -webkit-transition: margin 200ms, opacity 200ms;
-    -webkit-transition-delay: 100ms;
+    display: none;
 }
 
 .options-section header {
@@ -118,6 +106,8 @@ button:focus {
 
     background-image: -webkit-linear-gradient(white, white 40%, rgba(255, 255, 255, 0.92));
     border-bottom: 1px solid #eee;
+
+    z-index: 2;
 }
 
 .options-section header h2 {
@@ -135,7 +125,7 @@ button:focus {
  * snoozed-tabs list
  */
 
-#tabs-list-container ol {
+#days-list-container ol {
     list-style: none;
     -webkit-padding-start: 0;
 }
@@ -145,7 +135,7 @@ button:focus {
     padding: 10px;
 }
 
-.entry:nth-child(even) {
+.entry:nth-child(odd) {
     background-color: #F5F5F5;
 }
 
@@ -178,6 +168,16 @@ button:focus {
     color: rgb(151, 156, 160);
 }
 
+.entry-title, .entry-domain {
+    max-width: 300px;
+
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    vertical-align: text-bottom;
+}
+
 .entry-clear {
     background: url("/assets/icons/close.png") no-repeat center center;
     border: 0;
@@ -195,4 +195,45 @@ button:focus {
 
 .entry-clear:active {
     background-image: url("/assets/icons/close-pressed.png");
+}
+
+/*
+ * Settings
+ */
+
+#settings ul {
+    list-style: none;
+    -webkit-padding-start: 0;
+}
+
+.settings-group li {
+    font-size: 13px;
+    padding: 6px;
+    line-height: 26px;
+    clear: both;
+    overflow: auto;
+}
+
+.settings-group li:nth-child(odd) {
+    background-color: #F5F5F5;
+}
+
+.settings-group li .control {
+    float: right;
+    height: 26px;
+    min-width: 130px;
+}
+
+.bootstrap-timepicker {
+    display: inline;
+    float: right;
+}
+
+.bootstrap-timepicker input {
+    height: 13px;
+    width: 130px;
+}
+
+#badge-control input[type='radio'] {
+    margin: 0 4px 0 10px;
 }

@@ -97,11 +97,11 @@ button:focus {
     background-image: url("/assets/icons/white/later-today.png");
 }
 
-#this-evening .button-image {
+#this-evening .button-image, #tomorrow-evening .button-image {
     background-image: url("/assets/icons/grey/this-evening.png");
 }
 
-#this-evening:active .button-image {
+#this-evening:active .button-image, #tomorrow-evening:active .button-image {
     background-image: url("/assets/icons/white/this-evening.png");
 }
 
@@ -170,6 +170,16 @@ button:focus {
     float: left;
 }
 
+#default-status button {
+    border: 0;
+    background: none;
+    outline: 0;
+}
+
+#default-status button:hover {
+    text-decoration: underline;
+}
+
 #snoozed-status {
     display: none;
 }
@@ -184,4 +194,11 @@ button:focus {
 
     float: right;
     padding: 0px;
+
+    opacity: 0.7;
+    transition: opacity 0.2s ease-out;
+}
+
+#settings:hover {
+    opacity: 1.0;
 }

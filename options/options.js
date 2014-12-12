@@ -1,4 +1,5 @@
 var snoozedTabs;
+var settings;
 var bg = chrome.extension.getBackgroundPage();
 
 $(document).ready(function() {
@@ -8,21 +9,37 @@ $(document).ready(function() {
 
     function init() {
         console.log("options.js is initializing...");
-        snoozedTabs = JSON.parse(localStorage.getItem("snoozedTabs"));
+        snoozedTabs = bg.getSnoozedTabs();
         console.log("snoozedTabs from localStorage", snoozedTabs);
+        settings = bg.getSettings();
+        console.log("settings from localStorage", settings);
 
         // Set button click-handlers
         $(".nav-button").click(function(){
             var button = $(this);
             var buttonID = button.attr("id");
             var sectionName = buttonID.slice(0, -7);
-            setSection(sectionName);
+            setSection("#" + sectionName);
         });
 
         setupSnoozedTabs();
-        setupLogs();
         setupSettings();
         setupAbout();
+
+        var startSection = window.location.hash;
+        if(!startSection) {
+            startSection = "#snoozed-tabs";
+        }
+
+        setSection(startSection);
+
+        // Listen to changes to localStorage and update views
+        $(window).bind("storage", function() {
+            snoozedTabs = bg.getSnoozedTabs();
+            settings = bg.getSettings();
+            listSnoozedTabs();
+            renderSettings();
+        });
     }
 });
 
@@ -40,51 +57,147 @@ function setupSnoozedTabs() {
     }
 }
 
-function setupLogs() {
+function setupSettings() {
+    $("#reset-settings").click(function() {
+        resetSettings();
+    });
 
+    $('#start-day-timepicker').timepicker({
+        template: false,
+        showInputs: false,
+        minuteStep: 30,
+        defaultTime: settings["start-day"]
+    });
+
+    $('#end-day-timepicker').timepicker({
+        template: false,
+        showInputs: false,
+        minuteStep: 30,
+        defaultTime: settings["end-day"]
+    });
+
+    $('#start-weekend-timepicker').timepicker({
+        template: false,
+        showInputs: false,
+        minuteStep: 30,
+        defaultTime: settings["start-weekend"]
+    });
+
+    renderSettings();
+
+    $(".bootstrap-timepicker input").on("changeTime.timepicker", function(e) {
+        var id = $(this).attr("id");
+        var setting = id.substring(0, id.length - 11);
+        var time = e.time.value;
+
+        console.log("" + setting + " = " + time);
+        settings[setting] = time;
+        bg.setSettings(settings);
+        console.log("settings", bg.getSettings());
+    });
+
+    $("select.control").change(function(e){
+        var setting = $(this).attr("id");
+        var value = parseInt($(this).val());
+        console.log("Setting " + setting + " to " + value);
+
+        settings[setting] = value;
+        bg.setSettings(settings);
+
+        console.log("settings", bg.getSettings());
+    });
+
+    $("input[name='badge']").change(function(){
+        var badgeVal = $(this).val();
+        console.log("Setting badge to " + badgeVal);
+
+        settings["badge"] = badgeVal;
+        bg.setSettings(settings);
+
+        console.log("settings", settings);
+        bg.updateBadgeText();
+    });
 }
 
-function setupSettings() {
+function renderSettings() {
+    $("#start-day-timepicker").timepicker("setTime", settings["start-day"]);
+    $("#end-day-timepicker").timepicker("setTime", settings["end-day"]);
+    $("#start-weekend-timepicker").timepicker("setTime", settings["start-weekend"]);
 
+    $("#week-begin").val(settings["week-begin"]);
+    $("#weekend-begin").val(settings["weekend-begin"]);
+    $("#later-today").val(settings["later-today"]);
+    $("#someday").val(settings["someday"]);
+
+    $("input[name='badge']").val([settings["badge"]]);
+    bg.updateBadgeText();
 }
 
 function setupAbout() {
 
 }
 
-function setSection(sectionName) {
-    var button = $("#" + sectionName + "-button");
+function setSection(sectionID) {
+    var button = $(sectionID + "-button");
     var buttonListItem = button.parent();
-    var section = $("#" + sectionName);
+    var section = $(sectionID);
 
     // Set button
     $("#navigation li").removeClass("selected");
     buttonListItem.addClass("selected");
 
     // Set section
-    $(".options-section").removeClass("selected");
-    section.addClass("selected");
+    $(".options-section").hide();
+    section.fadeIn();
+
+    // Set page hash
+    window.location.hash = sectionID;
 }
 
 function listSnoozedTabs() {
+    $("#days-list").empty();
     var alarmTimes = Object.keys(snoozedTabs).sort();
     console.log("alarmTimes", alarmTimes);
 
-    for(var i = 0; i < alarmTimes.length; i++) {
+    for(var i = 0; i < alarmTimes.length - 1; i++) {
         var alarmTime = alarmTimes[i];
         var alarmSet = snoozedTabs[alarmTime];
 
+        var day = (new Date(parseInt(alarmTime)));
+        day.setHours(0, 0, 0, 0);
+
+        var dayHeading = $("#day-" + day.getTime());
+        if(dayHeading.length == 0) {
+            listDay(day);
+        }
+
         for(var j = 0; j < alarmSet.length; j++) {
             var tab = alarmSet[j];
-            listTab(tab);
+            listTab(tab, day);
         }
     }
 }
 
-function listTab(tab) {
+function listDay(day) {
+    var dayLi = $(document.createElement('li'));
+
+    var dayHeading = $(document.createElement('h3'));
+    dayHeading.addClass("day-heading");
+    dayHeading.text(formatDay(day));
+
+    var dayTabsList = $(document.createElement('ol'));
+    dayTabsList.attr("id", "day-" + day.getTime());
+    dayTabsList.addClass("day-tabs-list");
+
+    dayLi.append([dayHeading, dayTabsList]);
+
+    $("#days-list").append(dayLi);
+}
+
+function listTab(tab, day) {
     console.log("tab", tab);
 
-    var ol = $("#tabs-list-container ol");
+    var ol = $("#day-" + day.getTime());
 
     var entry = $(document.createElement('li'))
     entry.addClass("entry");
@@ -127,6 +240,42 @@ function listTab(tab) {
     ol.append(entry);
 }
 
+function formatDay(day) {
+    var result = "";
+
+    var tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    if(day.getTime() == tomorrow.getTime()) {
+        result += "Tomorrow — ";
+    }
+
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if(day.getTime() == today.getTime()) {
+        result += "Today — ";
+    }
+
+    var yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(0, 0, 0, 0);
+    if(day.getTime() == yesterday.getTime()) {
+        result += "Yesterday — ";
+    }
+
+    var weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", 
+                    "Thursday", "Friday", "Saturday"];
+    var months = ["January", "February", "March", "April", "May",
+                "June", "July", "August", "September", "October",
+                "November", "December"];
+
+    var weekday = weekdays[day.getDay()];
+    var month = months[day.getMonth()];
+
+    result += weekday + ", " + month + " " + day.getDate() + ", " + day.getFullYear();
+    return result;
+}
+
 function formatTime(alarmTime) {
     var time = new Date(alarmTime);
     console.log(time);
@@ -148,17 +297,21 @@ function clearAll() {
         return;
     }
 
-    var canClear = confirm("Are you sure you want to clear all " + tabCount + " tabs?");
+    var confirmText = "Are you sure you want to clear ";
+    if(tabCount == 1) {
+        confirmText += "1 tab?";
+    } else {
+        confirmText += "all " + tabCount + " tabs?";
+    }
+    var canClear = confirm(confirmText);
     if(canClear) {
         snoozedTabs = {};
         snoozedTabs["tabCount"] = 0;
         bg.setSnoozedTabs(snoozedTabs);
-        bg.updateBadgeText(snoozedTabs);
+        bg.updateBadgeText();
 
-        $(".entry").fadeOut(function() {
-            $(this).slideUp(function() {
-                $(this).remove();
-            });
+        $("#days-list li").fadeOut(function() {
+            $(this).remove();
         });
 
         $("#clear-all").prop('disabled', true);
@@ -170,15 +323,40 @@ function clearEntry(tab, entry) {
 
     bg.removeSnoozedTab(tab, snoozedTabs);
     bg.setSnoozedTabs(snoozedTabs);
-    bg.updateBadgeText(snoozedTabs);
+    bg.updateBadgeText();
 
-    entry.fadeOut(function() {
-        $(this).slideUp(function() {
+    var dayList = entry.parent();
+    var dayLi = dayList.parent();
+
+    console.log(dayList);
+    console.log(dayList.children().length);
+
+    if(dayList.children().length == 1) {
+        dayLi.fadeOut(function() {
             $(this).remove();
         });
-    });
+    } else {
+        entry.fadeOut(function() {
+            $(this).slideUp(function() {
+                $(this).remove();
+            });
+        });
+    }
 
     if(snoozedTabs["tabCount"] == 0) {
         $("#clear-all").prop('disabled', true);
     }
+}
+
+function resetSettings() {
+    var canReset = confirm("Are you sure you want to reset all settings?");
+    if(!canReset) {
+        return;
+    }
+
+    settings = JSON.parse(localStorage.getItem("defaultSettings"));
+    bg.setSettings(settings);
+
+    console.log("rendering");
+    renderSettings();
 }

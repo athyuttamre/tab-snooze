@@ -16,8 +16,9 @@ $(document).ready(function() {
                 console.log("status button clicked");
                 window.open(chrome.extension.getURL("options/index.html#snoozed-tabs"));
             });
-            button.text("" + tabCount + " Snoozed Tabs");
+
             $("#default-status").html(button);
+            updateStatusText(snoozedTabs);
         }
 
         // Set up button click-handlers
@@ -30,9 +31,36 @@ $(document).ready(function() {
             console.log("options clicked");
             window.open(chrome.extension.getURL("options/index.html#settings"));
         });
+
+        // Set up listener for when snoozedTabs changes
+        $(window).bind("storage", function(e) {
+            updateStatusText(bg.getSnoozedTabs());
+        });
+
+        // Update badge text
+        bg.updateBadgeText();
+    }
+
+    function updateStatusText(snoozedTabs) {
+        var tabCount = snoozedTabs["tabCount"];
+
+        if(tabCount > 0) {
+            var buttonText = "" + tabCount + " Snoozed Tab";
+            if(tabCount > 1) {
+                buttonText += "s";
+            }
+            var button = $("#default-status button");
+            button.text(buttonText);
+        } else {
+            $("#default-status").html("Tab Snooze");
+        }
     }
 
     function snoozeCurrentTab(time) {
+        if(!time) {
+            return;
+        }
+
         chrome.tabs.query({
             currentWindow: true,
             active: true
@@ -46,6 +74,8 @@ $(document).ready(function() {
         console.log("timeName", timeName);
         console.log("now", new Date());
 
+        var settings = bg.getSettings();
+
         // Get rounded time
         var roundedNow = new Date();
         roundedNow.setSeconds(0, 0); // Round date to minutes
@@ -57,6 +87,7 @@ $(document).ready(function() {
         var day = hour * 24;
 
         var result = new Date();
+        setSettingsTime(result, settings["start-day"]); // Default for most cases
 
         // Calculate wake-up time
         switch(timeName) {
@@ -64,46 +95,72 @@ $(document).ready(function() {
                 result = new Date(Date.now() + 10 * second);
                 break;
             case "later-today":
-                result = new Date(roundedNow.getTime() + 3 * hour);
+                result = new Date(roundedNow.getTime() + parseInt(settings["later-today"]) * hour);
                 break;
             case "this-evening":
-                /* NOTE: Fix for when time is past 6 PM */
-                result.setHours(18, 0, 0, 0); // 6:00:00:00 PM
+                setSettingsTime(result, settings["end-day"]);
+                break;
+            case "tomorrow-evening":
+                result.setDate(result.getDate() + 1);
+                setSettingsTime(result, settings["end-day"]);
                 break;
             case "tomorrow":
                 result.setDate(result.getDate() + 1); // Automatically updates months
-                result.setHours(9, 0, 0, 0); // 9:00:00:00 AM
                 break;
             case "this-weekend":
-                var daysToSaturday = 6 - result.getDay();
-                result.setDate(result.getDate() + daysToSaturday);
-                result.setHours(9, 0, 0, 0);
+                var daysToWeekend = daysToNextDay(result.getDay(), settings["weekend-begin"])
+                result.setDate(result.getDate() + daysToWeekend);
                 break;
             case "next-week":
-                var daysToMonday = (7 % result.getDay() - 1);
-                if(isNaN(daysToMonday)) {
-                    daysToMonday = 0;
-                } else if(daysToMonday == 0) {
-                    daysToMonday = 1; /* Today is Sunday */
-                }
-
-                result.setDate(result.getDate() + daysToMonday);
-                result.setHours(9, 0, 0, 0);
+                console.log("calculating next-week");
+                var daysToWeek = daysToNextDay(result.getDay(), settings["week-begin"]);
+                result.setDate(result.getDate() + daysToWeek);
                 break;
             case "in-a-month":
                 result.setMonth(result.getMonth() + 1);
                 break;
             case "someday":
-                result.setMonth(result.getMonth() + 3);
+                result.setMonth(result.getMonth() + settings["someday"]);
                 break;
             case "pick-date":
-                alert("Picking date is not yet available, sorry!");
+                bg.alert("Picking date is not yet available, sorry!");
+                result = undefined;
                 break;
             default:
                 result = new Date();
         }
 
         console.log("result", result);
+        return result;
+    }
+
+    function daysToNextDay(currentDay, nextDay) {
+        if(currentDay > 6 || currentDay < 0 || nextDay > 6 || nextDay < 0) {
+            return;
+        }
+
+        if(nextDay < currentDay) {
+            return (7 + nextDay) - currentDay;
+        } else {
+            return nextDay - currentDay;
+        }
+    }
+
+    function setSettingsTime(result, settingsTime) {
+        var timeParts = settingsTime.split(/[\s:]+/);
+        var hour = parseInt(timeParts[0]);
+        var minute = parseInt(timeParts[1]);
+        var meridian = timeParts[2];
+
+        if(meridian == "AM" && hour == 12) {
+            hour = 0;
+        }
+
+        if(meridian == "PM" && hour < 12) {
+            hour = hour + 12;
+        }
+
+        result.setHours(hour, minute, 0, 0);
         return result;
     }
 });
