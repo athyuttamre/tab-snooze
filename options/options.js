@@ -156,6 +156,14 @@ function setSection(sectionID) {
 
 function listSnoozedTabs() {
     $("#days-list").empty();
+
+    if(snoozedTabs["tabCount"] == 0) {
+        $(".no-tabs").fadeIn();
+        return;
+    } else {
+        $(".no-tabs").hide();
+    }
+
     var alarmTimes = Object.keys(snoozedTabs).sort();
     console.log("alarmTimes", alarmTimes);
 
