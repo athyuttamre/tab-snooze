@@ -88,6 +88,8 @@ body {
 
 .download {
     text-align: left;
+    display: inline-block;
+    text-decoration: none;
     padding: 10px 20px;
 
     margin-left: 0.2em;
