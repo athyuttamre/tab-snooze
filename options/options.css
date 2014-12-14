@@ -113,12 +113,12 @@ button:focus {
 .options-section header h2 {
     margin: 0;
     padding: 21px 0px 13px;
+    float: left;
 }
 
 .options-section header button {
-    position: absolute;
-    top: 21px;
-    right: 0px;
+    float: right;
+    margin: 21px 0px 13px 5px !important;
 }
 
 .no-tabs {
@@ -249,6 +249,19 @@ button:focus {
 
 .product-description {
     margin-top: 30px;
+}
+
+.links {
+    margin-top: 10px;
+}
+
+.links a {
+    color: #666;
+    margin-right: 3px;
+}
+
+.links a:hover {
+    text-decoration: underline;
 }
 
  .version {

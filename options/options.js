@@ -47,12 +47,17 @@ function setupSnoozedTabs() {
     // List snoozed tabs
     listSnoozedTabs();
 
-    // Set Clear-All Button
+    // Set Clear-All and Export Button
     if(snoozedTabs["tabCount"] == 0) {
         $("#clear-all").prop('disabled', true);
+        $("#export-tabs").prop('disabled', true);
     } else {
         $("#clear-all").click(function() {
             clearAll();
+        });
+
+        $("#export-tabs").click(function() {
+            exportTabs();    
         });
     }
 }
@@ -367,4 +372,30 @@ function resetSettings() {
 
     console.log("rendering");
     renderSettings();
+}
+
+function exportTabs() {
+    window.URL = window.URL || window.webkitURL;
+
+    var now = new Date();
+    dateString = "" + now.getFullYear() + now.getMonth() + now.getDate() + "-" + now.getHours() + now.getMinutes();
+
+    var exportObject = {
+        exportTime: now.getTime(),
+        settings: settings,
+        snoozedTabs: snoozedTabs
+    }
+
+    var blob = new Blob([JSON.stringify(exportObject, undefined, 2)], {type: 'text/plain'});
+    var blobURL = window.URL.createObjectURL(blob);
+
+    chrome.downloads.download({
+        url: blobURL,
+        filename: "tabsnooze-" + dateString + ".json",
+        saveAs: true
+    });
+}
+
+function errorHandler(e) {
+    console.log("errorHandler called!", e);
 }

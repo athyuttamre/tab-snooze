@@ -9,32 +9,33 @@
 {
   "manifest_version": 2,
   "name": "Tab Snooze",
-  "version": "0.1",
+  "version": "0.2",
 
   "description": "Snooze tabs for later.",
   "icons": {},
 
-  // Popup on clicking extension icon
+  /* Popup on clicking extension icon */
   "browser_action": {
     "default_icon": "assets/icons/browserAction.png",
     "default_popup": "popup/popup.html"
   },
 
-  // Core functionality
+  /* Core functionality */
   "background": {
     "persistent": true,
     "scripts": ["background.js"]
   },
 
-  // Extension options
+  /* Extension options */
   "options_page": "options/index.html",
 
-  // User permissions
+  /* User permissions */
   "permissions": [
     "tabs",
     "alarms",
     "storage",
-    "notifications"
+    "notifications",
+    "downloads"
   ],
 
   "web_accessible_resources": [
@@ -43,15 +44,15 @@
     "assets/*"
   ],
 
-  // Keyboard shortcuts
+  /* Keyboard shortcuts */
   "commands": {
     "_execute_browser_action": {
       "suggested_key": {
-        "default": "Ctrl+Shift+S" // Not working!
+        "default": "Alt+S"
       }
     }
   },
 
   "author": "@athyuttamre",
-  "homepage_url": "http://tab-snooze.com"
+  "homepage_url": "http://athyuttamreddy.com/tab-snooze/"
 }
