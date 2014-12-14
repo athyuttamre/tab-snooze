@@ -107,12 +107,45 @@ body {
     margin-top: 30px;
 }
 
-.download:hover {
+.download:hover, .mc_button:hover {
     cursor: pointer;
     background-color: #4e4e4e;
     border: 2px solid #4e4e4e;
 
     transition: 0.1s ease-out;
+}
+
+#mc_embed_signup_scroll {
+    overflow: auto;
+    margin-left: 0.2em;
+    margin-top: 30px;
+}
+
+.mc_label {
+    display: block;
+    margin: 10px 0;
+}
+
+.mc_email, .mc_button {
+    display: inline-block;
+
+    padding: 10px 20px;
+
+    font-family: inherit;
+    font-size: 1em;
+
+    outline: 0;
+    border: 2px solid #666;
+    border-radius: 3px;
+}
+
+.mc_button_div {
+    display: inline-block;
+}
+
+.mc_button {
+    background-color: #666;
+    color: white;
 }
 
 .leading-image {
