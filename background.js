@@ -51,14 +51,14 @@ function init() {
 
 /**
  * Snoozes a tab for later.
- * 
+ *
  * @param  {Tab} tab        A Tab object representing the current tab
  * @param  {int} alarmTime  Time object representing when the tab should resurface
  */
 function snooze(tab, alarmTime) {
     console.log("\nsnooze called...");
     // Get snoozed tabs
-    
+
     var snoozedTabs = getSnoozedTabs();
     console.log("Loaded from localStorage", snoozedTabs);
 
@@ -97,38 +97,65 @@ function popCheck() {
  */
 function popTabs(timestamp, snoozedTabs) {
     console.log("\npopTabs went off!", timestamp);
-    alert("Popping tabs!");
 
+    var NotificationID = null;
     /* NOTE: Use notifications instead of alerts */
+    var opt = {
+      type: 'basic',
+      title: 'TabSnooze',
+      message: "Popping tabs!",
+      priority: 1,
+      iconUrl: chrome.extension.getURL("assets/icons/browserAction.png"),
+      buttons: [{
+        title: "Open Now",
+        iconUrl: chrome.extension.getURL("assets/icons/browserAction.png")
+      }, {
+        title: "Snooze",
+        iconUrl: chrome.extension.getURL("assets/icons/close.png")
+      }]
+    };
+    chrome.notifications.create('tab-snooze', opt, function(id) {
+      console.log("\nnotification created!");
+      NotificationID = id;
+    });
 
-    // Get tabs to be resurfaced
-    var tabs = snoozedTabs[timestamp];
+    /* Respond to the user's clicking one of the buttons */
+    chrome.notifications.onButtonClicked.addListener(function(notifId, btnIdx) {
+      if (notifId === NotificationID) {
+        if (btnIdx === 0) {
+          // Get tabs to be resurfaced
+          var tabs = snoozedTabs[timestamp];
 
-    // Create window for resurfaced tabs
-    var newWindow;
+          // Create window for resurfaced tabs
+          var newWindow;
 
-    chrome.windows.create({
-        focused: false
-    }, function(w) {
-        newWindow = w;
+          chrome.windows.create({
+            focused: false
+          }, function(w) {
+            newWindow = w;
 
-        // Create tabs in newWindow
-        for(var i = 0; i < tabs.length; i++) {
-            createTab(tabs[i], newWindow);
+            // Create tabs in newWindow
+            for(var i = 0; i < tabs.length; i++) {
+              createTab(tabs[i], newWindow);
+            }
+
+            /* NOTE: Creating tabs is asynchronous; It's possible for them
+            to fail and for us to delete the whole set from storage; FIX THIS. */
+
+            // Delete key and update tabCount
+            delete snoozedTabs[timestamp];
+            snoozedTabs["tabCount"] -= tabs.length;
+
+            // Set badge text
+            updateBadgeText();
+
+            // Update snoozed tabs
+            setSnoozedTabs(snoozedTabs);
+          });
+        } else if (btnIdx === 1) {
+          console.log('Snoozed tab again upon user response');
         }
-
-        /* NOTE: Creating tabs is asynchronous; It's possible for them
-        to fail and for us to delete the whole set from storage; FIX THIS. */
-        
-        // Delete key and update tabCount
-        delete snoozedTabs[timestamp];
-        snoozedTabs["tabCount"] -= tabs.length;
-
-        // Set badge text
-        updateBadgeText();
-
-        // Update snoozed tabs
-        setSnoozedTabs(snoozedTabs);
+      }
     });
 }
 
@@ -202,7 +229,7 @@ function removeSnoozedTab(tab, snoozedTabs) {
         console.log("Tab not found, returning");
         return;
     }
-    
+
     // Update old alarm set
     alarmSet.splice(tabIndex, 1);
     if(alarmSet.length == 0) {
