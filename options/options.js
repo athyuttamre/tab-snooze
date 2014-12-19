@@ -122,6 +122,19 @@ function setupSettings() {
         console.log("settings", settings);
         bg.updateBadgeText();
     });
+
+		 $("input[name='here']").change(function(){
+        var hereVal = $(this).val();
+        
+				console.log("Setting here to " + hereVal);
+
+        settings["here"] = hereVal == "false" ? false : true;
+        bg.setSettings(settings);
+
+        console.log("settings", settings);
+    });
+
+
 }
 
 function renderSettings() {
@@ -133,6 +146,8 @@ function renderSettings() {
     $("#weekend-begin").val(settings["weekend-begin"]);
     $("#later-today").val(settings["later-today"]);
     $("#someday").val(settings["someday"]);
+
+		$("input[name='here']").val([settings["here"]]);
 
     $("input[name='badge']").val([settings["badge"]]);
     bg.updateBadgeText();
