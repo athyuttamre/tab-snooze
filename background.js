@@ -35,7 +35,8 @@ function init() {
             "weekend-begin": 6,
             "later-today": 3,
             "someday": 3,
-            "badge": true
+            "badge": true,
+						"here": true
         };
         setSettings(settings);
         localStorage.setItem("defaultSettings", JSON.stringify(settings));
@@ -96,40 +97,69 @@ function popCheck() {
  * @param  {String} timestamp   Timestamp of the tabs set
  */
 function popTabs(timestamp, snoozedTabs) {
-    console.log("\npopTabs went off!", timestamp);
-    alert("Popping tabs!");
+	console.log("\npopTabs went off!", timestamp);
+	alert("Popping tabs!");
 
-    /* NOTE: Use notifications instead of alerts */
+	/* NOTE: Use notifications instead of alerts */
 
-    // Get tabs to be resurfaced
-    var tabs = snoozedTabs[timestamp];
+	// Get tabs to be resurfaced
+	var tabs = snoozedTabs[timestamp];
 
-    // Create window for resurfaced tabs
-    var newWindow;
+	// Create window for resurfaced tabs
+	var newWindow;
 
-    chrome.windows.create({
-        focused: false
-    }, function(w) {
-        newWindow = w;
+	var settings = getSettings();
+	
+	console.log(settings);
 
-        // Create tabs in newWindow
-        for(var i = 0; i < tabs.length; i++) {
-            createTab(tabs[i], newWindow);
-        }
+	if(settings.here) {
 
-        /* NOTE: Creating tabs is asynchronous; It's possible for them
-        to fail and for us to delete the whole set from storage; FIX THIS. */
-        
-        // Delete key and update tabCount
-        delete snoozedTabs[timestamp];
-        snoozedTabs["tabCount"] -= tabs.length;
+		chrome.windows.getCurrent(function(w){
+			newWindow = w;
+			// Create tabs in newWindow
+			for(var i = 0; i < tabs.length; i++) {
+				createTab(tabs[i], newWindow);
+			}
 
-        // Set badge text
-        updateBadgeText();
+			// Delete key and update tabCount
+			delete snoozedTabs[timestamp];
+			snoozedTabs["tabCount"] -= tabs.length;
 
-        // Update snoozed tabs
-        setSnoozedTabs(snoozedTabs);
-    });
+			// Set badge text
+			updateBadgeText();
+
+			// Update snoozed tabs
+			setSnoozedTabs(snoozedTabs);
+
+		});
+
+	} else {
+
+		chrome.windows.create({
+			focused: false
+		}, function(w) {
+			newWindow = w;
+
+			// Create tabs in newWindow
+			for(var i = 0; i < tabs.length; i++) {
+				createTab(tabs[i], newWindow);
+			}
+
+			/* NOTE: Creating tabs is asynchronous; It's possible for them
+				 to fail and for us to delete the whole set from storage; FIX THIS. */
+
+			// Delete key and update tabCount
+			delete snoozedTabs[timestamp];
+			snoozedTabs["tabCount"] -= tabs.length;
+
+			// Set badge text
+			updateBadgeText();
+
+			// Update snoozed tabs
+			setSnoozedTabs(snoozedTabs);
+		});
+	}
+
 }
 
 function changeSnoozeTime(tab, newTime) {
@@ -160,6 +190,7 @@ function getSettings() {
 }
 
 function setSettings(newSettings) {
+		console.log(newSettings);
     localStorage.setItem("settings", JSON.stringify(newSettings));
 }
 
