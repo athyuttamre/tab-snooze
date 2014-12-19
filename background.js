@@ -37,8 +37,8 @@ function init() {
             "weekend-begin": 6,
             "later-today": 3,
             "someday": 3,
-            "open-new-tab": true,
-            "badge": true
+            "open-new-tab": "true",
+            "badge": "true"
         };
         setSettings(settings);
         localStorage.setItem("defaultSettings", JSON.stringify(settings));
@@ -79,6 +79,8 @@ function popCheck() {
         console.log("Offline, will popCheck later.");
         return;
     }
+
+    clearAllNotifications();
 
     // Get snoozed tabs and settings
     snoozedTabs = getSnoozedTabs();
@@ -155,6 +157,18 @@ function showNotification(tabs, callback) {
         }]
     }, function(id) {
         callback(id);
+    });
+}
+
+function clearAllNotifications() {
+    chrome.notifications.getAll(function(notifications) {
+        notifications = Object.keys(notifications);
+        for(var i = 0; i < notifications.length; i++) {
+            var id = notifications[i];
+            chrome.notifications.clear(id, function() {
+                
+            });
+        }
     });
 }
 
