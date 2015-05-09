@@ -23,13 +23,30 @@ $(document).ready(function() {
 
         // Set up button click-handlers
         $("#snooze-buttons button").click(function() {
-            var time = getTime($(this).attr("id"));
-            snoozeCurrentTab(time);
+            var timeName = $(this).attr("id");
+            console.log("button-clicked", timeName);
+
+            if(timeName == "pick-date") {
+                $("#datepicker").slideDown({
+                    duration: 500,
+                    easing: "easeInOutBack"
+                });
+            } else {
+                var time = getTime($(this).attr("id"));
+                snoozeCurrentTab(time);
+            }
         });
 
         $("#settings").click(function() {
             console.log("options clicked");
             window.open(chrome.extension.getURL("options/index.html#settings"));
+        });
+
+        // Set up datepicker
+        $("#datepicker").datepicker({
+            showOtherMonths: true,
+            selectOtherMonths: true,
+            showButtonPanel: true
         });
 
         // Set up listener for keyboard shortcuts
@@ -126,7 +143,6 @@ $(document).ready(function() {
                 result.setMonth(result.getMonth() + settings["someday"]);
                 break;
             case "pick-date":
-                bg.alert("Picking date is not yet available, sorry!");
                 result = undefined;
                 break;
             default:

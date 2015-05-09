@@ -140,6 +140,11 @@ function popCheck() {
     }
 }
 
+/**
+ * Shows the notification for the given tabs
+ * @param  {Tab[]}   tabs       List of tabs waiting to be popped
+ * @param  {Function} callback  Callback function called after notification is shown
+ */
 function showNotification(tabs, callback) {
     var tabCount = tabs.length;
     var message = "" + tabCount + ((tabCount > 1) ? " tabs are back" : " tab is back");
@@ -160,6 +165,9 @@ function showNotification(tabs, callback) {
     });
 }
 
+/**
+ * Clears all notifications created by the extension.
+ */
 function clearAllNotifications() {
     chrome.notifications.getAll(function(notifications) {
         notifications = Object.keys(notifications);

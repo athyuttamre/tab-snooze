@@ -98,7 +98,6 @@ function setupSettings() {
         console.log("" + setting + " = " + time);
         settings[setting] = time;
         bg.setSettings(settings);
-        console.log("settings", bg.getSettings());
     });
 
     $("select.control").change(function(e){
@@ -108,8 +107,6 @@ function setupSettings() {
 
         settings[setting] = value;
         bg.setSettings(settings);
-
-        console.log("settings", bg.getSettings());
     });
 
     $("input[name='badge']").change(function(){
@@ -118,8 +115,6 @@ function setupSettings() {
 
         settings["badge"] = badgeVal;
         bg.setSettings(settings);
-
-        console.log("settings", settings);
         bg.updateBadgeText();
     });
 
@@ -129,8 +124,6 @@ function setupSettings() {
 
         settings["open-new-tab"] = openVal;
         bg.setSettings(settings);
-
-        console.log("settings", settings);
     });
 }
 
@@ -355,10 +348,12 @@ function clearEntry(tab, entry) {
     var dayLi = dayList.parent();
 
     console.log(dayList);
+    console.log(dayLi);
     console.log(dayList.children().length);
 
     if(dayList.children().length == 1) {
         dayLi.fadeOut(function() {
+            console.log($(this));
             $(this).remove();
         });
     } else {

@@ -16,14 +16,14 @@ button:focus {
  */
 
 #snooze-buttons {
-    width: 16.5em;
-    height: 16.5em;
+    width: 270px;
+    height: 270px;
     border-collapse: collapse;
 }
 
 #snooze-buttons td {
-    width: 5.5em;
-    height: 5.5em;
+    width: 90px;
+    height: 90px;
     border: 1px solid #E2E6E6;
     vertical-align: middle;
 }
@@ -55,11 +55,11 @@ button:focus {
     padding: 0 0.2em;
 }
 
-#snooze-buttons button:hover {
+#snooze-buttons button:hover, #pick-date:active {
     background-color: #F6F8F8;
 }
 
-#snooze-buttons button:active {
+#snooze-buttons button:active:not(#pick-date) {
     background-color: #FED23B;
     color: white;
 }
@@ -150,8 +150,84 @@ button:focus {
     background-image: url("/assets/icons/grey/pick-date.png");
 }
 
-#pick-date:active .button-image {
+/*#pick-date:active .button-image {
     background-image: url("/assets/icons/white/pick-date.png");
+}*/
+
+/**
+ * Calendar
+ */
+
+#datepicker {
+    display: none;
+    padding: 5px;
+
+    box-shadow: inset  0  8px 8px -11px #696868, 
+                inset  0 -8px 8px -11px #696868;
+}
+
+.ui-datepicker {
+    font-size: 0.8em;
+    font-family: inherit;
+    box-sizing: border-box;
+    width: 100%;
+
+    border: 0;
+    border-radius: 0 !important;
+}
+
+.ui-datepicker table {
+    margin: 0;
+}
+
+.ui-datepicker-header {
+    background-color: transparent;
+    padding: 0;
+    border: 0;
+}
+
+.ui-datepicker th {
+    color: #9FA6A8;
+}
+
+.ui-datepicker td {
+    height: 37px;
+    width: 37px;
+
+    display: table-cell;
+    vertical-align: middle;
+
+    padding: 0;
+    border: 1px solid #E2E6E6;
+}
+
+.ui-datepicker td a.ui-state-default {
+    padding: 0;
+    border: 0 !important;
+    background-color: transparent;
+
+    color: #9FA6A8;
+
+    text-align: center;
+    line-height: 37px;
+}
+
+.ui-datepicker td a.ui-state-default:hover:not(.ui-state-highlight):not(.ui-state-active) {
+    background-color: #F6F8F8;
+}
+
+.ui-datepicker td a.ui-priority-secondary {
+    background-color: #F5F5F5;  
+}
+
+.ui-datepicker td a.ui-state-active {
+    background-color: #FED23B;
+    color: white;
+}
+
+.ui-datepicker-buttonpane {
+    margin: 0 !important;
+    border: 0;
 }
 
 /**

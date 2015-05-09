@@ -93,6 +93,7 @@ button:focus {
 
 .options-section {
     display: none;
+    margin-top: 20px;
 }
 
 .options-section header {
@@ -118,11 +119,10 @@ button:focus {
 
 .options-section header button {
     float: right;
-    margin: 21px 0px 13px 5px !important;
+    margin: 13px 0px 13px 5px !important;
 }
 
 .no-tabs {
-    padding: 30px 0px;
     color: #999;
 }
 
@@ -227,6 +227,7 @@ button:focus {
     float: right;
     height: 26px;
     min-width: 130px;
+    text-align: right;
 }
 
 .bootstrap-timepicker {
